@@ -13,9 +13,8 @@ void Ball::generate()
 			float xPos = center.x + radius * std::cos(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
 			float yPos = center.y + radius * std::cos(ySegment * PI);
 			float zPos = center.z + radius * std::sin(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
-			sphereVertices.push_back(xPos);
-			sphereVertices.push_back(yPos);
-			sphereVertices.push_back(zPos);
+			glm::vec3 vertex = glm::vec3(xPos, yPos, zPos);
+			sphereVertices.push_back(vertex);
 		}
 	}
 
@@ -43,7 +42,7 @@ void Ball::setupBall()
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	//将顶点数据绑定至当前默认的缓冲中
-	glBufferData(GL_ARRAY_BUFFER, sphereVertices.size() * sizeof(float), &sphereVertices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sphereVertices.size() * sizeof(glm::vec3), &sphereVertices[0], GL_STATIC_DRAW);
 
 	glGenBuffers(1, &EBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
@@ -73,7 +72,6 @@ void Ball::Draw(Shader& shader)
 	//glCullFace(GL_BACK);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0);
-
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glBindVertexArray(0);
 }
@@ -86,4 +84,19 @@ glm::mat4 Ball::getModelMatrix(float deltaTime)
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, move);
 	return model;
+}
+
+std::vector<glm::vec3> Ball::getVertices()
+{
+	return sphereVertices;
+}
+
+glm::vec3 Ball::getCenter()
+{
+	return center;
+}
+
+glm::vec3 Ball::getDirection()
+{
+	return direction;
 }

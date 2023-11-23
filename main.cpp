@@ -69,7 +69,7 @@ int main()
     // -----------
     Model ourModel("models/bunny.obj");
     //Model testModel("nanosuit/nanosuit.obj");
-    Ball ball(glm::vec3(4.0f, 2.0f, 0.0f), 0.1f);
+    Ball ball(glm::vec3(3.0f, 1.0f, 0.0f), 0.1f);
 
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -119,10 +119,21 @@ int main()
 
 
         ballShader.use();
-        ballShader.setMatrix4fv("model", 1, ball.getModelMatrix(deltaTime));
+        float ball_time = 0;
+        if (!ball.stop) {
+            ball_time = deltaTime;
+        }
+        ballShader.setMatrix4fv("model", 1, ball.getModelMatrix(ball_time));
         ballShader.setMatrix4fv("view", 1, view);
         ballShader.setMatrix4fv("projection", 1, projection);
         ball.Draw(ballShader);
+
+        std::shared_ptr<glm::vec3> collisionPoint = check_collision(ourModel, ball);
+        if (collisionPoint) {
+            glm::vec3* point = collisionPoint.get();
+            std::cout << "collision at :(" << point->x << "," << point->y << "," << point->z << ")" << std::endl;
+            ball.stop = true;
+        }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

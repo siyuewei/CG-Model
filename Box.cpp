@@ -79,3 +79,16 @@ void Box::Draw(Shader& shader)
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glBindVertexArray(0);
 }
+
+bool Box::isInBox(glm::vec3 vertex)
+{
+	if (vertex.x >= min_x && vertex.x <= max_x &&
+		vertex.y >= min_y && vertex.y <= max_y &&
+		vertex.z >= min_z && vertex.z <= max_z) {
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}

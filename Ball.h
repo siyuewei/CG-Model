@@ -19,16 +19,21 @@ private:
 	glm::vec3 direction;
 	float speed = 0.2f;
 	static float moveTime;
-	std::vector<float> sphereVertices;
+	std::vector<glm::vec3> sphereVertices;
 	std::vector<int> sphereIndices;
 	unsigned int VBO, EBO;
 	void generate();
 	void setupBall();
 public:
 	unsigned int VAO;
+	bool stop = false;
 
 	Ball(glm::vec3 center, float radius);
 	void Draw(Shader& shader);
+
 	glm::mat4 getModelMatrix(float deltaTime);
+	std::vector<glm::vec3> getVertices();
+	glm::vec3 getCenter();
+	glm::vec3 getDirection();
 };
 
