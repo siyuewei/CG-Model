@@ -12,6 +12,7 @@
 
 #include "Mesh.h"
 #include "shader.h"
+#include "Box.h"
 
 #include <string>
 #include <fstream>
@@ -30,6 +31,7 @@ public:
     vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
     vector<Mesh> meshes_out;
     vector<Mesh> meshes_in;
+    Box box;
     string directory;
     bool gammaCorrection;
     float distance = 0.01;
@@ -40,6 +42,7 @@ public:
     // draws the model, and thus all its meshes
     void DrawOut(Shader& shader);
     void DrawIn(Shader& shader);
+    void DrawBox(Shader& shader);
 
 private:
     // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.

@@ -1,15 +1,13 @@
-﻿  Ball.cpp
+﻿  Box.cpp
+E:\code\OpenGL\HW02\Box.cpp(78,47): warning C4267: “参数”: 从“size_t”转换到“GLsizei”，可能丢失数据
+  Model.cpp
+E:\code\OpenGL\HW02\Model.h(37,22): warning C4305: “初始化”: 从“double”到“float”截断
+  (编译源文件“Model.cpp”)
+  
   main.cpp
-E:\code\OpenGL\HW02\Model.h(35,22): warning C4305: “初始化”: 从“double”到“float”截断
+E:\code\OpenGL\HW02\Model.h(37,22): warning C4305: “初始化”: 从“double”到“float”截断
   (编译源文件“main.cpp”)
   
-E:\code\OpenGL\HW02\main.cpp(194,17): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-E:\code\OpenGL\HW02\main.cpp(195,17): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-E:\code\OpenGL\HW02\main.cpp(199,19): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
-E:\code\OpenGL\HW02\main.cpp(200,19): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
-E:\code\OpenGL\HW02\main.cpp(204,13): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-E:\code\OpenGL\HW02\main.cpp(205,13): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-E:\code\OpenGL\HW02\main.cpp(217,27): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
   正在生成代码...
 LINK : warning LNK4098: 默认库“MSVCRT”与其他库的使用冲突；请使用 /NODEFAULTLIB:library
   HW02.vcxproj -> E:\code\OpenGL\HW02\x64\Debug\HW02.exe

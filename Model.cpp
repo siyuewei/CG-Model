@@ -2,7 +2,7 @@
 
 Model::Model(string const& path, bool gamme) : gammaCorrection(gamme)
 {
-	loadModel(path);
+	loadModel(path);   
 }
 
 void Model::DrawOut(Shader& shader)
@@ -18,6 +18,13 @@ void Model::DrawIn(Shader& shader)
         meshes_in[i].Draw(shader);
     }
 }
+
+void Model::DrawBox(Shader& shader)
+{
+
+
+}
+
 
 void Model::loadModel(string const& path)
 {
@@ -64,6 +71,13 @@ std::pair<Mesh,Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene)
     vector<Vertex> vertices_in;
     vector<unsigned int> indices;
     vector<Texture> textures;
+
+    float minX = 0;
+    float maxX = 0;
+    float minY = 0;
+    float maxY = 0;
+    float minZ = 0;
+    float maxZ = 0;
 
     // walk through each of the mesh's vertices
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -116,7 +130,30 @@ std::pair<Mesh,Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene)
 
         vertices_out.push_back(vertex_out);
         vertices_in.push_back(vertex_in);
+
+        //¼ÆËã°üÎ§ºÐ
+        if (vertex_out.Position.x > maxX) {
+            maxX = vertex_out.Position.x;
+        }
+        else if (vertex_out.Position.x < minX){
+            minX = vertex_out.Position.x;
+        }
+        if (vertex_out.Position.y > maxY) {
+            maxY = vertex_out.Position.y;
+        }
+        else if (vertex_out.Position.y < minY) {
+            minY = vertex_out.Position.y;
+        }
+        if (vertex_out.Position.z > maxZ) {
+            maxZ = vertex_out.Position.z;
+        }
+        else if (vertex_out.Position.z < minZ) {
+            minZ = vertex_out.Position.z;
+        }
     }
+
+    box = Box(minX, maxX, minY, maxY, minZ, maxZ);
+
     // now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
     for (unsigned int i = 0; i < mesh->mNumFaces; i++)
     {

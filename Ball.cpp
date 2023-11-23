@@ -69,8 +69,8 @@ Ball::Ball(glm::vec3 center, float radius):center(center),radius(radius)
 void Ball::Draw(Shader& shader)
 {
 	glBindVertexArray(VAO);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
+	//glEnable(GL_CULL_FACE);
+	//glCullFace(GL_BACK);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0);
 
