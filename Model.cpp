@@ -25,6 +25,182 @@ void Model::DrawBox(Shader& shader)
 
 }
 
+void Model::DrawStrip(Shader& shader)
+{
+    if (strip_conven_indices.empty()) {
+        return;
+    }
+    //按顺序取出strip_indices中的每个顶点，编号依次是0，1，2...
+    //内外表面之间的三角形条带满足关系：
+    //  1. 编号相同的顶点之间有一条线
+    //  2. 外表面中编号为i的顶点和内表面中编号为i+1的顶点之间有一条线
+    //      如果i是最后一个编号，那就和内表面中编号为0的顶点之间有一条线
+    //这样就可以得到所有的三角形进行绘制
+    vector<glm::vec3> strip_vertex;
+    vector<unsigned int> strip_indices;
+
+    for (unsigned int i = 0; i < strip_conven_indices.size(); ++i) {
+        strip_vertex.push_back(meshes_out[collision_mesh_indice].vertices[strip_conven_indices[i]].Position);
+        strip_vertex.push_back(meshes_in[collision_mesh_indice].vertices[strip_conven_indices[i]].Position);
+        if (i != strip_conven_indices.size() - 1) {
+            //三角形1
+            strip_indices.push_back(2 * i);
+            strip_indices.push_back(2 * i + 1);
+            strip_indices.push_back(2 * i + 3);
+
+            //三角形2
+            strip_indices.push_back(2 * i);
+            strip_indices.push_back(2 * i + 2);
+            strip_indices.push_back(2 * i + 3);
+        }
+    }
+    //特殊处理最后一组
+    strip_indices.push_back(2 * (strip_conven_indices.size() - 1));
+    strip_indices.push_back(2 * (strip_conven_indices.size() - 1) + 1);
+    strip_indices.push_back(1);
+
+    strip_indices.push_back(2 * (strip_conven_indices.size() - 1));
+    strip_indices.push_back(0);
+    strip_indices.push_back(1);
+
+    // 生成并绑定VAO
+    unsigned int stripVAO, stripVBO, stripEBO;
+    glGenVertexArrays(1, &stripVAO);
+    glGenBuffers(1, &stripVBO);
+    glGenBuffers(1, &stripEBO);
+
+    glBindVertexArray(stripVAO);
+
+    // 绑定顶点数据
+    glBindBuffer(GL_ARRAY_BUFFER, stripVBO);
+    glBufferData(GL_ARRAY_BUFFER, strip_vertex.size() * sizeof(glm::vec3), &strip_vertex[0], GL_STATIC_DRAW);
+
+    // 绑定索引数据
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, stripEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, strip_indices.size() * sizeof(unsigned int), &strip_indices[0], GL_STATIC_DRAW);
+
+    // 设置顶点属性指针
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+    // 绑定结束
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    // 渲染
+    glBindVertexArray(stripVAO);
+    glDrawElements(GL_TRIANGLES, strip_indices.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+}
+
+void Model::explosion()
+{
+    //清除内外表面碰撞的部分
+    this->meshes_out[collision_mesh_indice].explosion();
+    this->meshes_in[collision_mesh_indice].delete_indices = this->meshes_out[collision_mesh_indice].delete_indices;
+
+    this->delete_indices = meshes_out[collision_mesh_indice].delete_tri_indices;
+    //对delete_indices进行选择排序
+    strip_conven_indices = convexHull(delete_indices);
+}
+
+vector<unsigned int> Model::convexHull(vector<unsigned int> indices)
+{
+    //1. 遍历所有三角形的三条边，放入edges里面
+    //      如果边在edges里面已经存在，就只增加数量，否则新加一条边
+    //      起点和终点相反的边算同一条边
+    //2. 找到所有数量为1的边放入prei_edges里面
+    //3. 从prei_edges[0]边开始，把start_indice,end_indice依次放入convexHullIndices里面
+    //   然后在prei_edges里面找start_indice或end_indice为prei_edges[0]的end_indice的边，放入convexHullIndices里面
+    //   直到prei_edges中的所有边都加入convexHullIndices
+    vector<edge> edges;
+    vector<edge> prei_edges;
+
+    // 1. 遍历所有三角形的三条边，放入edges里面
+    for (size_t i = 0; i < indices.size(); i += 3) {
+        unsigned int ind1 = indices[i];
+        unsigned int ind2 = indices[i + 1];
+        unsigned int ind3 = indices[i + 2];
+        glm::vec3 pos1 = meshes_out[collision_mesh_indice].vertices[ind1].Position;
+        glm::vec3 pos2 = meshes_out[collision_mesh_indice].vertices[ind2].Position;
+        glm::vec3 pos3 = meshes_out[collision_mesh_indice].vertices[ind3].Position;
+
+
+        // 添加边到edges
+        addEdge(edges, pos1,pos2,  ind1, ind2);
+        addEdge(edges, pos2,pos3,ind2, ind3);
+        addEdge(edges,pos3,pos1, ind3, ind1);
+    }
+
+    // 2. 找到所有数量为1的边放入prei_edges里面
+    for (const edge& e : edges) {
+        if (e.count == 1) {
+            prei_edges.push_back(e);
+        }
+    }
+
+    vector<unsigned int> convexHullIndices;
+
+    // 3. 构建凸包
+    if (!prei_edges.empty()) {
+        // 从prei_edges[0]边开始
+        edge currentEdge = prei_edges[0];
+        prei_edges.erase(prei_edges.begin());
+
+        // 把start_indice, end_indice依次放入convexHullIndices里面
+        convexHullIndices.push_back(currentEdge.start_indice);
+        convexHullIndices.push_back(currentEdge.end_indice);
+
+        // 在prei_edges里面找start_indice或end_indice为currentEdge的end_indice的边，放入convexHullIndices里面
+        while (!prei_edges.empty()) {
+            unsigned int nextIndex = findNextEdge(prei_edges, currentEdge.end);
+            if (nextIndex != UINT_MAX) {
+                currentEdge = prei_edges[nextIndex];
+                prei_edges.erase(prei_edges.begin() + nextIndex);
+
+                if (currentEdge.start_indice == convexHullIndices.back()) {
+                    convexHullIndices.push_back(currentEdge.end_indice);
+                }
+                else {
+                    convexHullIndices.push_back(currentEdge.start_indice);
+                }
+            }
+            else {
+                break;
+            }
+        }
+    }
+
+    return convexHullIndices;
+}
+
+void Model::addEdge(vector<edge>& edges, glm::vec3 start, glm::vec3 end, unsigned int start_indice, unsigned int end_indice)
+{
+    // 起点和终点相反的边算同一条边
+    for (edge& e : edges) {
+        if ((e.start == start && e.end == end) || (e.start == end && e.end == start)) {
+            e.count++;
+            return;
+        }
+    }
+
+    // 边在edges里面不存在，新加一条边
+    edges.emplace_back(start, end,start_indice,end_indice);
+}
+
+unsigned int Model::findNextEdge(const vector<edge>& prei_edges, glm::vec3 end)
+{
+    for (size_t i = 0; i < prei_edges.size(); ++i) {
+        if (prei_edges[i].start == end || prei_edges[i].end == end) {
+            return static_cast<unsigned int>(i);
+        }
+    }
+    return UINT_MAX;
+}
+
+
+
+
 
 void Model::loadModel(string const& path)
 {

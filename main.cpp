@@ -64,6 +64,8 @@ int main()
     Shader outShader("model_out.vs", "model_out.fs");
     Shader inShader("model_in.vs", "model_in.fs");
     Shader ballShader("ball.vs", "ball.fs");
+    Shader stripShader("strip.vs", "strip.fs");
+
 
     // load models
     // -----------
@@ -125,7 +127,16 @@ int main()
         ball.update(deltaTime);
         ball.Draw(ballShader);
 
-        check_collision(ourModel, ball);
+        if (check_collision(ourModel, ball)) {
+            ball.explosion(deltaTime);
+            ourModel.explosion();
+        }
+        
+        stripShader.use();
+        stripShader.setMatrix4fv("model", 1, model);
+        stripShader.setMatrix4fv("view", 1, view);
+        stripShader.setMatrix4fv("projection", 1, projection);
+        ourModel.DrawStrip(stripShader);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

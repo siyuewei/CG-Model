@@ -62,7 +62,7 @@ void Ball::setupBall()
 Ball::Ball(glm::vec3 center, float radius):center(center),radius(radius)
 {
 	moveTime = 0.0f;
-	direction = glm::normalize(glm::vec3(0.0f, 0.0f, 0.0f) - center);
+	direction = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f) - center);
 
 }
 
@@ -79,16 +79,16 @@ void Ball::Draw(Shader& shader)
 	glBindVertexArray(0);
 }
 
-
-
 std::vector<glm::vec3> Ball::getVertices()
 {
 	return sphereVertices;
 }
 
-void Ball::explosion()
+void Ball::explosion(float deltatime)
 {
-
+	direction = -direction;
+	center += direction * deltatime;
+	speed *= 0.5;
 }
 
 glm::vec3 Ball::getCenter()
@@ -100,6 +100,9 @@ void Ball::update(float deltatime)
 {
 	float velocity = speed * deltatime;
 	center += direction * velocity;
+	//考虑重力加速度，每次y轴方向加 1/2g(t1^2-t2^2) 
+	center.y -= 0.006 * ((moveTime + deltatime) * (moveTime + deltatime) - moveTime * moveTime);
+	moveTime += deltatime;
 }
 
 glm::vec3 Ball::getDirection()

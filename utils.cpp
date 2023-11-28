@@ -81,7 +81,7 @@ void scroll_callback(GLFWwindow* window, double xOffset, double yOffset)
     camera.ProgressScroll(yOffset);
 }
 
-bool check_collision(Model model, Ball ball)
+bool check_collision(Model &model, Ball &ball)
 {
     //判断是否和包围盒相交
     if (!check_collision_box_ball(model.box, ball)) {
@@ -90,7 +90,8 @@ bool check_collision(Model model, Ball ball)
     //std::cout << "collision with box" << std::endl;
    
     //判断是否和model相交
-    for (Mesh mesh : model.meshes_out) {
+    for (unsigned int i = 0; i < model.meshes_out.size(); ++i) {
+        Mesh &mesh = model.meshes_out[i];
         Triangle_indices result = check_collision_mesh_ball(mesh, ball);
         if (result.indice1 == 0 && result.indice2 == 0 && result.indice3 == 0) {
             continue;
@@ -105,6 +106,10 @@ bool check_collision(Model model, Ball ball)
                 << mesh.vertices[result.indice3].Position.x << ", "
                 << mesh.vertices[result.indice3].Position.y << ", "
                 << mesh.vertices[result.indice3].Position.z << ")" << std::endl;
+            mesh.collision_tra_indices.push_back(result.indice1);
+            mesh.collision_tra_indices.push_back(result.indice2);
+            mesh.collision_tra_indices.push_back(result.indice3);
+            model.collision_mesh_indice = i;
             return true;
         }
     }
@@ -112,7 +117,7 @@ bool check_collision(Model model, Ball ball)
 }
 
 //相交返回true
-bool check_collision_box_ball(Box box, Ball ball)
+bool check_collision_box_ball(Box &box, Ball &ball)
 {
     //glm::vec3 tran_ball_center = glm::vec3(ball.getModelMatrix(0) * glm::vec4(ball.getCenter(), 1.0f));
     glm::vec3 tran_ball_center = ball.getCenter();
@@ -137,7 +142,7 @@ float distance_point_line(glm::vec3& point, glm::vec3& start, glm::vec3& end)
     return distance;
 }
 
-Triangle_indices check_collision_mesh_ball(Mesh mesh, Ball ball)
+Triangle_indices check_collision_mesh_ball(Mesh &mesh, Ball &ball)
 {
     //对mesh中每个三角形，判断是否和球相撞
     //1.计算球心离三角形平面的距离，判断是否小于半径，不小于则一定不相撞

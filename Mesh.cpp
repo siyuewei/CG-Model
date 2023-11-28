@@ -1,4 +1,5 @@
 #include "Mesh.h"
+#include <algorithm>
 
 Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
 {
@@ -84,9 +85,98 @@ void Mesh::Draw(Shader& shader)
 
     // draw mesh
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
+    for (unsigned int i = 0; i < indices.size(); i += 3) {
+        unsigned int ind1 = indices[i];
+        unsigned int ind2 = indices[i + 1];
+        unsigned int ind3 = indices[i + 2];
+
+        // 检查当前三角形的顶点是否在 delete_indices 中
+        if (std::find(delete_indices.begin(), delete_indices.end(), ind1) == delete_indices.end() &&
+            std::find(delete_indices.begin(), delete_indices.end(), ind2) == delete_indices.end() &&
+            std::find(delete_indices.begin(), delete_indices.end(), ind3) == delete_indices.end()) {
+            // 如果不在 delete_indices 中，绘制这个三角形
+            glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, reinterpret_cast<void*>(i * sizeof(unsigned int)));
+        }
+        
+    }
     glBindVertexArray(0);
 
     // always good practice to set everything back to defaults once configured.
     glActiveTexture(GL_TEXTURE0);
+}
+
+void Mesh::sortVerticesCCW(glm::vec3& normal, unsigned int& ind1, unsigned int& ind2, unsigned int& ind3)
+{
+    // 获取三个顶点
+    glm::vec3 v1 = vertices[ind1].Position;
+    glm::vec3 v2 = vertices[ind2].Position;
+    glm::vec3 v3 = vertices[ind3].Position;
+
+    // 计算三个顶点相对于法线的法线方向（右手法则）
+    glm::vec3 crossProduct = glm::cross(v2 - v1, v3 - v1);
+
+    // 如果法线方向与顶点法线一致，则不需要调整顺序
+    if (glm::dot(crossProduct, normal) >= 0.0f) {
+        return;
+    }
+
+    // 否则，调整顺序
+    std::swap(ind1, ind3);
+}
+
+void Mesh::findNeighbors(unsigned int indices1, unsigned int indices2, unsigned int indices3)
+{
+    //for (unsigned int i = 0; i < indices.size(); i += 3) {
+    //    unsigned int ind1 = this->indices[i];
+    //    unsigned int ind2 = this->indices[i + 1];
+    //    unsigned int ind3 = this->indices[i + 2];
+
+    //    // 检查当前三角形是否包含给定的顶点
+    //    if ((ind1 == indices1 || ind1 == indices2 || ind1 == indices3) &&
+    //        (ind2 == indices1 || ind2 == indices2 || ind2 == indices3) &&
+    //        (ind3 == indices1 || ind3 == indices2 || ind3 == indices3)) {
+
+    //        // 调整顶点顺序以保证与法线方向一致
+    //        sortVerticesCCW(vertices[ind1].Normal, ind1, ind2, ind3);
+
+    //        // 将当前三角形的顶点按顺序添加到 neighbors 中
+    //        neighbors.push_back(ind1);
+    //        neighbors.push_back(ind2);
+    //        neighbors.push_back(ind3);
+    //    }
+    //}
+     // 计算给定三个顶点组成的三角形的中心点
+    glm::vec3 center = (vertices[indices1].Position + vertices[indices2].Position + vertices[indices3].Position) / 3.0f;
+    float radius = 0.05f;
+
+    for (unsigned int i = 0; i < vertices.size(); ++i) {
+        float distance = glm::length(vertices[i].Position - center);
+        if (distance <= radius) {
+            delete_indices.push_back(i);
+        }
+    }
+    for (unsigned int i = 0; i < indices.size(); i += 3) {
+        unsigned int ind1 = this->indices[i];
+        unsigned int ind2 = this->indices[i + 1];
+        unsigned int ind3 = this->indices[i + 2];
+
+        if (!(std::find(delete_indices.begin(), delete_indices.end(), ind1) == delete_indices.end() &&
+            std::find(delete_indices.begin(), delete_indices.end(), ind2) == delete_indices.end() &&
+            std::find(delete_indices.begin(), delete_indices.end(), ind3) == delete_indices.end())) {
+            // 如果在 delete_indices 中，加入delete_tri_indices
+            delete_tri_indices.push_back(ind1);
+            delete_tri_indices.push_back(ind2);
+            delete_tri_indices.push_back(ind3);
+        }
+    }
+}
+
+void Mesh::explosion()
+{
+    if (collision_tra_indices.size() == 0) {
+        std::cout << "ERROR: COLLISION INDICE IS NOT SET" << std::endl;
+        return;
+    }
+    findNeighbors(collision_tra_indices[0], collision_tra_indices[1], collision_tra_indices[2]);
+
 }

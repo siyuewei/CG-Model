@@ -157,6 +157,8 @@
     <None Include="model_in.vs" />
     <None Include="model_out.fs" />
     <None Include="model_out.vs" />
+    <None Include="strip.fs" />
+    <None Include="strip.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

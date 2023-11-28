@@ -30,7 +30,7 @@ public:
 
 	Ball(glm::vec3 center, float radius);
 	void Draw(Shader& shader);
-	void explosion();
+	void explosion(float deltatime);
 
 	void update(float deltatime);
 	std::vector<glm::vec3> getVertices();
