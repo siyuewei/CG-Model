@@ -1,13 +1,6 @@
-﻿  utils.cpp
-D:\software\code\vstudio\Microsoft Visual Studio\2022\VC\Tools\MSVC\14.38.33130\include\optional(11): warning STL4038: The contents of <optional> are available only with C++17 or later.
+﻿  main.cpp
 E:\code\OpenGL\HW02\Model.h(37,22): warning C4305: “初始化”: 从“double”到“float”截断
-  (编译源文件“utils.cpp”)
+  (编译源文件“main.cpp”)
   
-E:\code\OpenGL\HW02\utils.cpp(58,17): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-E:\code\OpenGL\HW02\utils.cpp(59,17): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-E:\code\OpenGL\HW02\utils.cpp(63,19): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
-E:\code\OpenGL\HW02\utils.cpp(64,19): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
-E:\code\OpenGL\HW02\utils.cpp(68,13): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-E:\code\OpenGL\HW02\utils.cpp(69,13): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-E:\code\OpenGL\HW02\utils.cpp(81,27): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+D:\software\code\vstudio\Microsoft Visual Studio\2022\VC\Tools\MSVC\14.38.33130\include\optional(11): warning STL4038: The contents of <optional> are available only with C++17 or later.
   HW02.vcxproj -> E:\code\OpenGL\HW02\x64\Debug\HW02.exe

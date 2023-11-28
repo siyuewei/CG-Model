@@ -81,62 +81,111 @@ void scroll_callback(GLFWwindow* window, double xOffset, double yOffset)
     camera.ProgressScroll(yOffset);
 }
 
-std::shared_ptr<glm::vec3> check_collision(Model model, Ball ball)
+bool check_collision(Model model, Ball ball)
 {
     //判断是否和包围盒相交
-    std::shared_ptr<glm::vec3> collosion_box_ball = check_collision_box_ball(model.box, ball);
-    if (collosion_box_ball == nullptr) {
-        return nullptr;
+    if (!check_collision_box_ball(model.box, ball)) {
+        return false;
     }
-    std::cout << "collision with box" << std::endl;
+    //std::cout << "collision with box" << std::endl;
+   
     //判断是否和model相交
     for (Mesh mesh : model.meshes_out) {
-        std::shared_ptr<glm::vec3> collosion_mesh_ball = check_collision_mesh_ball(mesh, ball);
-        if (collosion_mesh_ball) {
-            return collosion_mesh_ball;
-        }
-    }
-    return nullptr;
-}
-
-std::shared_ptr<glm::vec3> check_collision_box_ball(Box box, Ball ball)
-{
-    for (glm::vec3 vertex : ball.getVertices()) {
-        glm::vec3 tran_ball_vertex = glm::vec3(ball.getModelMatrix(0) * glm::vec4(vertex, 1.0f));
-        if (box.isInBox(tran_ball_vertex)) {
-            return std::make_shared<glm::vec3>(vertex);
-        }
-    }
-    return nullptr;
-}
-
-std::shared_ptr<glm::vec3> check_collision_mesh_ball(Mesh mesh, Ball ball)
-{
-    for (glm::vec3 ball_vertex : ball.getVertices()) {
-        //只要选运动方向朝向那半面的点计算就可以，减少一般计算量
-        glm::vec3 center_to_ball_vertex = ball_vertex - ball.getCenter();
-        if (glm::dot(center_to_ball_vertex, ball.getDirection()) <= 0) {
+        Triangle_indices result = check_collision_mesh_ball(mesh, ball);
+        if (result.indice1 == 0 && result.indice2 == 0 && result.indice3 == 0) {
             continue;
         }
-        //判断剩下的点是否和mesh相撞
-        glm::vec3 tran_ball_vertex = glm::vec3(ball.getModelMatrix(0) * glm::vec4(ball_vertex, 1.0f));
-        for (Vertex mesh_vertex : mesh.vertices) {
-            //对球上每个点做一个小包围盒，只有位于这个包围盒内的mesh点才做检测
-            //否则直接对所有mesh遍历，下面用法线方向判断就不正确，因为一个model的所有顶点法线必然是各个朝向都有的
-            //那无论如何都会判读成相撞
-            float aabb_length = 0.01f;
-            if (mesh_vertex.Position.x >= tran_ball_vertex.x - aabb_length && mesh_vertex.Position.x <= tran_ball_vertex.x + aabb_length &&
-                mesh_vertex.Position.y >= tran_ball_vertex.y - aabb_length && mesh_vertex.Position.y <= tran_ball_vertex.y + aabb_length &&
-                mesh_vertex.Position.z >= tran_ball_vertex.z - aabb_length && mesh_vertex.Position.z <= tran_ball_vertex.z + aabb_length) {
-                glm::vec3 ball_to_mesh = mesh_vertex.Position - tran_ball_vertex;
-                if (glm::dot(ball_to_mesh, mesh_vertex.Normal) > 0) {
-                    return std::make_shared<glm::vec3>(mesh_vertex.Position);
-                }
+        else {
+            std::cout << "Collision at triangle (" << mesh.vertices[result.indice1].Position.x << ", "
+                << mesh.vertices[result.indice1].Position.y << ", "
+                << mesh.vertices[result.indice1].Position.z << "), ("
+                << mesh.vertices[result.indice2].Position.x << ", "
+                << mesh.vertices[result.indice2].Position.y << ", "
+                << mesh.vertices[result.indice2].Position.z << "), ("
+                << mesh.vertices[result.indice3].Position.x << ", "
+                << mesh.vertices[result.indice3].Position.y << ", "
+                << mesh.vertices[result.indice3].Position.z << ")" << std::endl;
+            return true;
+        }
+    }
+    return false;
+}
+
+//相交返回true
+bool check_collision_box_ball(Box box, Ball ball)
+{
+    //glm::vec3 tran_ball_center = glm::vec3(ball.getModelMatrix(0) * glm::vec4(ball.getCenter(), 1.0f));
+    glm::vec3 tran_ball_center = ball.getCenter();
+    float offset_x = max(box.min_x, min(tran_ball_center.x, box.max_x));
+    float offset_y = max(box.min_y, min(tran_ball_center.y, box.max_y));
+    float offset_z = max(box.min_z, min(tran_ball_center.z, box.max_z));
+
+    float distance = (tran_ball_center.x - offset_x) * (tran_ball_center.x - offset_x) +
+        (tran_ball_center.y - offset_y) * (tran_ball_center.y - offset_y) +
+        (tran_ball_center.z - offset_z) * (tran_ball_center.z - offset_z);
+
+    return distance < ball.getRadius();
+}
+
+float distance_point_line(glm::vec3& point, glm::vec3& start, glm::vec3& end)
+{
+    glm::vec3 edge = end - start;
+    glm::vec3 start_to_point = point - start;
+
+    glm::vec3 projection = glm::dot(edge, start_to_point) * glm::normalize(edge);
+    float distance = glm::length(start_to_point - projection);
+    return distance;
+}
+
+Triangle_indices check_collision_mesh_ball(Mesh mesh, Ball ball)
+{
+    //对mesh中每个三角形，判断是否和球相撞
+    //1.计算球心离三角形平面的距离，判断是否小于半径，不小于则一定不相撞
+    //2.如果小于，判断球心在三角形平面内的投影是否在 三角形三条边向外扩充半径长度 形成的新三角形内
+    // 2.1 判断球心投影是否在原三角形内部，如果在就碰撞
+    // 2.2 如果不在，计算球心离三条边的距离，如果最短距离小于半径就碰撞
+
+    for (unsigned int i = 0; i < mesh.indices.size(); i += 3)
+    {
+        glm::vec3 ver_pos1 = mesh.vertices[mesh.indices[i]].Position;
+        glm::vec3 ver_pos2 = mesh.vertices[mesh.indices[i + 1]].Position;
+        glm::vec3 ver_pos3 = mesh.vertices[mesh.indices[i + 2]].Position;
+        //glm::vec3 center = glm::vec3(ball.getModelMatrix(0) * glm::vec4(ball.getCenter(), 1.0f));
+        glm::vec3 center = ball.getCenter();
+
+        //计算三角形法线(可能向里也可能向外)
+        glm::vec3 normal = glm::normalize(glm::cross(ver_pos2 - ver_pos1, ver_pos3 - ver_pos1));
+        float distance_center_triangle = glm::dot(ver_pos1 - center, normal);
+
+        if (abs(distance_center_triangle) <= ball.getRadius()) {
+            //std::cout << "The distance between ball and traingle is less than radius" << std::endl;
+            //计算球心投影
+            glm::vec3 projection = center - distance_center_triangle * normal;
+
+            //通过计算投影点是否在三角形三条边同一侧来判断 点是否在三角形内部
+            float side1 = glm::dot(glm::cross(ver_pos2 - ver_pos3, projection - ver_pos3), normal);
+            float side2 = glm::dot(glm::cross(ver_pos1 - ver_pos2, projection - ver_pos2), normal);
+            float side3 = glm::dot(glm::cross(ver_pos3 - ver_pos1, projection - ver_pos1), normal);
+
+            if ((side1 >= 0 && side2 >= 0 && side3 >= 0) || (side1 <= 0 && side2 <= 0 && side3 <= 0)) {
+                std::cout << "The projection of center is in traingle " << std::endl;
+                return Triangle_indices(mesh.indices[i], mesh.indices[i+1],mesh.indices[i+2]);
             }
-            else {
-                continue;
+
+            //计算球心离三边的最短距离
+            float min_distance = std::min(
+                std::min(
+                    distance_point_line(center, ver_pos1, ver_pos2), 
+                    distance_point_line(center, ver_pos3, ver_pos2)
+                ),
+                distance_point_line(center, ver_pos1, ver_pos3)
+            );
+            if (min_distance <= ball.getRadius()) {
+                std::cout << "The distance between center and edge is less than radius" << std::endl;
+                return Triangle_indices(mesh.indices[i], mesh.indices[i + 1], mesh.indices[i + 2]);
             }
         }
     }
-    return nullptr;
+
+    return Triangle_indices(0, 0, 0);
 }

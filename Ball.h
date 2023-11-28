@@ -30,10 +30,13 @@ public:
 
 	Ball(glm::vec3 center, float radius);
 	void Draw(Shader& shader);
+	void explosion();
 
-	glm::mat4 getModelMatrix(float deltaTime);
+	void update(float deltatime);
 	std::vector<glm::vec3> getVertices();
 	glm::vec3 getCenter();
 	glm::vec3 getDirection();
+	float getRadius();
+
 };
 

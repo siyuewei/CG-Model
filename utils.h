@@ -27,10 +27,21 @@ extern bool firstMouse;
 extern float deltaTime;
 extern float lastFrame;
 
+struct Triangle_indices {
+	unsigned int indice1;
+	unsigned int indice2;
+	unsigned int indice3;
 
-std::shared_ptr<glm::vec3> check_collision(Model model, Ball ball);
-std::shared_ptr<glm::vec3> check_collision_box_ball(Box box, Ball ball);
-std::shared_ptr<glm::vec3> check_collision_mesh_ball(Mesh mesh, Ball ball);
+	Triangle_indices() {};
+	Triangle_indices(unsigned int indice1, unsigned int indice2, unsigned int indice3)
+		:indice1(indice1), indice2(indice2), indice3(indice3){}
+
+};
+
+bool check_collision(Model model, Ball ball);
+bool check_collision_box_ball(Box box, Ball ball);
+Triangle_indices check_collision_mesh_ball(Mesh mesh, Ball ball);
+float distance_point_line(glm::vec3& point, glm::vec3& start, glm::vec3& end);
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);

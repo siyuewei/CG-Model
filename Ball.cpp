@@ -3,6 +3,8 @@ float Ball::moveTime;
 
 void Ball::generate()
 {
+	sphereVertices.clear();
+	sphereIndices.clear();
 	// 生成球的顶点
 	for (int y = 0; y <= Y_SEGMENTS; y++)
 	{
@@ -61,12 +63,13 @@ Ball::Ball(glm::vec3 center, float radius):center(center),radius(radius)
 {
 	moveTime = 0.0f;
 	direction = glm::normalize(glm::vec3(0.0f, 0.0f, 0.0f) - center);
-    generate();
-	setupBall();
+
 }
 
 void Ball::Draw(Shader& shader)
 {
+	generate();
+	setupBall();
 	glBindVertexArray(VAO);
 	//glEnable(GL_CULL_FACE);
 	//glCullFace(GL_BACK);
@@ -76,19 +79,16 @@ void Ball::Draw(Shader& shader)
 	glBindVertexArray(0);
 }
 
-glm::mat4 Ball::getModelMatrix(float deltaTime)
-{
-	this->moveTime += deltaTime;
-	float offset = speed * moveTime;
-	glm::vec3 move = offset * direction;
-	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, move);
-	return model;
-}
+
 
 std::vector<glm::vec3> Ball::getVertices()
 {
 	return sphereVertices;
+}
+
+void Ball::explosion()
+{
+
 }
 
 glm::vec3 Ball::getCenter()
@@ -96,7 +96,18 @@ glm::vec3 Ball::getCenter()
 	return center;
 }
 
+void Ball::update(float deltatime)
+{
+	float velocity = speed * deltatime;
+	center += direction * velocity;
+}
+
 glm::vec3 Ball::getDirection()
 {
 	return direction;
+}
+
+float Ball::getRadius()
+{
+	return radius;
 }
