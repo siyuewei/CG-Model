@@ -236,6 +236,10 @@ void Model::loadModel(string const& path)
 
 	// process ASSIMP's root node recursively
 	processNode(scene->mRootNode, scene);
+
+    //保存内表面
+    string outputPath = path.substr(0, path.find_last_of('.')) + "_inner.obj";
+    saveInnerSurfaceToObj(outputPath);
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene)
@@ -454,4 +458,56 @@ unsigned int TextureFromFile(const char* path, const string& directory, bool gam
     }
 
     return textureID;
+}
+
+// 存储新生成的顶点和表面
+void Model::saveInnerSurfaceToObj(const string& outputPath)
+{
+    ofstream outFile(outputPath);
+    if (!outFile.is_open())
+    {
+        cout << "Failed to open output file: " << outputPath << endl;
+        return;
+    }
+
+    // 写入顶点数据
+    for (const auto& mesh : meshes_in)
+    {
+        for (const auto& vertex : mesh.vertices)
+        {
+            outFile << "v " << vertex.Position.x << " " << vertex.Position.y << " " << vertex.Position.z << endl;
+        }
+    }
+
+    // 写入法线数据
+    for (const auto& mesh : meshes_in)
+    {
+        for (const auto& vertex : mesh.vertices)
+        {
+            outFile << "vn " << vertex.Normal.x << " " << vertex.Normal.y << " " << vertex.Normal.z << endl;
+        }
+    }
+
+    // 写入纹理坐标数据
+    for (const auto& mesh : meshes_in)
+    {
+        for (const auto& vertex : mesh.vertices)
+        {
+            outFile << "vt " << vertex.TexCoords.x << " " << vertex.TexCoords.y << endl;
+        }
+    }
+
+    // 写入面数据
+    for (const auto& mesh : meshes_in)
+    {
+        for (size_t i = 0; i < mesh.indices.size(); i += 3)
+        {
+            outFile << "f " << mesh.indices[i] + 1 << "/" << mesh.indices[i] + 1 << "/" << mesh.indices[i] + 1 << " "
+                << mesh.indices[i + 1] + 1 << "/" << mesh.indices[i + 1] + 1 << "/" << mesh.indices[i + 1] + 1 << " "
+                << mesh.indices[i + 2] + 1 << "/" << mesh.indices[i + 2] + 1 << "/" << mesh.indices[i + 2] + 1 << endl;
+        }
+    }
+
+    outFile.close();
+    cout << "Inner surface saved to: " << outputPath << endl;
 }

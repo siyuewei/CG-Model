@@ -14,6 +14,8 @@
 
 #include <iostream>
 
+bool start = false;
+
 int main()
 {
     // glfw: initialize and configure
@@ -72,7 +74,7 @@ int main()
     // -----------
     Model ourModel("models/bunny_simplify.obj");
     //Model testModel("nanosuit/nanosuit.obj");
-    Ball ball(glm::vec3(3.0f, 2.0f, 0.0f), 0.01f);
+    Ball ball(glm::vec3(1.5f, 0.3f, 0.0f), 0.01f);
 
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -91,61 +93,72 @@ int main()
         // -----
         processInput(window);
 
-        // render
-        // ------
-        glEnable(GL_DEPTH_TEST);
-        glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // create transformations
-        glm::mat4 model = glm::mat4(1.0f);
-        glm::mat4 view = glm::mat4(1.0f);
-        view = camera.GetViewMatrix();
-        glm::mat4 projection = glm::mat4(1.0f);
-        projection = glm::perspective(glm::radians(camera.getZoom()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        if (start) {
+            // render
+ // ------
+            glEnable(GL_DEPTH_TEST);
+            glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+            // create transformations
+            glm::mat4 model = glm::mat4(1.0f);
+            glm::mat4 view = glm::mat4(1.0f);
+            view = camera.GetViewMatrix();
+            glm::mat4 projection = glm::mat4(1.0f);
+            projection = glm::perspective(glm::radians(camera.getZoom()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
+            if (check_collision(ourModel, ball)) {
+                ourModel.explosion(deltaTime);
+                ball.explosion(deltaTime);
+            }
 
-        if (check_collision(ourModel, ball)) {
-            ourModel.explosion(deltaTime);
-            ball.explosion(deltaTime);
+            // get matrix's uniform location and set matrix
+            outShader.use();
+            outShader.setMatrix4fv("model", 1, model);
+            outShader.setMatrix4fv("view", 1, view);
+            outShader.setMatrix4fv("projection", 1, projection);
+            outShader.setFloatVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+            outShader.setFloatVec3("lightPos", lightPos);
+            outShader.setFloatVec3("viewPos", camera.getPosition());
+            ourModel.DrawOut(outShader);
+            ourModel.DrawBox(outShader);
+
+            if (ourModel.is_coll) {
+                ourModel.updateFragment(deltaTime);
+                fragmentShader.use();
+                fragmentShader.setMatrix4fv("model", 1, model);
+                fragmentShader.setMatrix4fv("view", 1, view);
+                fragmentShader.setMatrix4fv("projection", 1, projection);
+                fragmentShader.setFloatVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+                fragmentShader.setFloatVec3("lightPos", lightPos);
+                fragmentShader.setFloatVec3("viewPos", camera.getPosition());
+                ourModel.DrawFragment(fragmentShader);
+            }
+
+            inShader.use();
+            inShader.setMatrix4fv("model", 1, model);
+            inShader.setMatrix4fv("view", 1, view);
+            inShader.setMatrix4fv("projection", 1, projection);
+            inShader.setFloatVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+            inShader.setFloatVec3("lightPos", lightPos);
+            inShader.setFloatVec3("viewPos", camera.getPosition());
+            ourModel.DrawIn(inShader);
+
+            ballShader.use();
+            ballShader.setMatrix4fv("model", 1, model);
+            ballShader.setMatrix4fv("view", 1, view);
+            ballShader.setMatrix4fv("projection", 1, projection);
+            ball.update(deltaTime);
+            ball.Draw(ballShader);
+
+            stripShader.use();
+            stripShader.setMatrix4fv("model", 1, model);
+            stripShader.setMatrix4fv("view", 1, view);
+            stripShader.setMatrix4fv("projection", 1, projection);
+            ourModel.DrawStrip(stripShader);
         }
-
-        // get matrix's uniform location and set matrix
-        outShader.use();
-        outShader.setMatrix4fv("model", 1, model);
-        outShader.setMatrix4fv("view", 1, view);
-        outShader.setMatrix4fv("projection", 1, projection);
-        ourModel.DrawOut(outShader);
-        ourModel.DrawBox(outShader);
-        
-        if (ourModel.is_coll) {
-            ourModel.updateFragment(deltaTime);
-            fragmentShader.use();
-            fragmentShader.setMatrix4fv("model", 1, model);
-            fragmentShader.setMatrix4fv("view", 1, view);
-            fragmentShader.setMatrix4fv("projection", 1, projection);
-            ourModel.DrawFragment(fragmentShader);
-        }
-
-        inShader.use();
-        inShader.setMatrix4fv("model", 1, model);
-        inShader.setMatrix4fv("view", 1, view);
-        inShader.setMatrix4fv("projection", 1, projection);
-        ourModel.DrawIn(inShader);
-
-        ballShader.use();
-        ballShader.setMatrix4fv("model", 1, model);
-        ballShader.setMatrix4fv("view", 1, view);
-        ballShader.setMatrix4fv("projection", 1, projection);
-        ball.update(deltaTime);
-        ball.Draw(ballShader);
-
-        stripShader.use();
-        stripShader.setMatrix4fv("model", 1, model);
-        stripShader.setMatrix4fv("view", 1, view);
-        stripShader.setMatrix4fv("projection", 1, projection);
-        ourModel.DrawStrip(stripShader);
+ 
 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

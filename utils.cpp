@@ -14,6 +14,10 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+glm::vec3 lightPos = glm::vec3(-5.0f, 4.0f, 0.0f);
+
+extern bool start;
+
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow* window)
@@ -38,6 +42,9 @@ void processInput(GLFWwindow* window)
     }
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
         camera.ProgressKeyBoard(DOWN, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+        start = true;
     }
 }
 

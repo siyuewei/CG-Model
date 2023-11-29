@@ -62,7 +62,7 @@ void Ball::setupBall()
 Ball::Ball(glm::vec3 center, float radius):center(center),radius(radius)
 {
 	moveTime = 0.0f;
-	direction = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f) - center);
+	direction = glm::normalize(glm::vec3(0.0f, 0.0f, 0.0f) - center);
 
 }
 

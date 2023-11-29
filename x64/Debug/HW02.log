@@ -1,7 +1,39 @@
-﻿  Ball.cpp
-E:\code\OpenGL\HW02\Ball.cpp(104,20): warning C4244: “-=”: 从“double”转换到“T”，可能丢失数据
-E:\code\OpenGL\HW02\Ball.cpp(104,20): warning C4244:         with
-E:\code\OpenGL\HW02\Ball.cpp(104,20): warning C4244:         [
-E:\code\OpenGL\HW02\Ball.cpp(104,20): warning C4244:             T=float
-E:\code\OpenGL\HW02\Ball.cpp(104,20): warning C4244:         ]
+﻿  Model.cpp
+E:\code\OpenGL\HW02\Model.h(53,22): warning C4305: “初始化”: 从“double”到“float”截断
+  (编译源文件“Model.cpp”)
+  
+E:\code\OpenGL\HW02\Model.cpp(37,52): warning C4267: “参数”: 从“size_t”转换到“GLsizei”，可能丢失数据
+E:\code\OpenGL\HW02\Model.cpp(78,31): warning C4267: “参数”: 从“size_t”转换到“_Ty”，可能丢失数据
+E:\code\OpenGL\HW02\Model.cpp(78,31): warning C4267:         with
+E:\code\OpenGL\HW02\Model.cpp(78,31): warning C4267:         [
+E:\code\OpenGL\HW02\Model.cpp(78,31): warning C4267:             _Ty=unsigned int
+E:\code\OpenGL\HW02\Model.cpp(78,31): warning C4267:         ]
+E:\code\OpenGL\HW02\Model.cpp(79,67): warning C4267: “参数”: 从“size_t”转换到“_Ty”，可能丢失数据
+E:\code\OpenGL\HW02\Model.cpp(79,67): warning C4267:         with
+E:\code\OpenGL\HW02\Model.cpp(79,67): warning C4267:         [
+E:\code\OpenGL\HW02\Model.cpp(79,67): warning C4267:             _Ty=unsigned int
+E:\code\OpenGL\HW02\Model.cpp(79,67): warning C4267:         ]
+E:\code\OpenGL\HW02\Model.cpp(82,31): warning C4267: “参数”: 从“size_t”转换到“_Ty”，可能丢失数据
+E:\code\OpenGL\HW02\Model.cpp(82,31): warning C4267:         with
+E:\code\OpenGL\HW02\Model.cpp(82,31): warning C4267:         [
+E:\code\OpenGL\HW02\Model.cpp(82,31): warning C4267:             _Ty=unsigned int
+E:\code\OpenGL\HW02\Model.cpp(82,31): warning C4267:         ]
+  main.cpp
+E:\code\OpenGL\HW02\Model.h(53,22): warning C4305: “初始化”: 从“double”到“float”截断
+  (编译源文件“main.cpp”)
+  
+D:\software\code\vstudio\Microsoft Visual Studio\2022\VC\Tools\MSVC\14.38.33130\include\optional(11): warning STL4038: The contents of <optional> are available only with C++17 or later.
+  utils.cpp
+D:\software\code\vstudio\Microsoft Visual Studio\2022\VC\Tools\MSVC\14.38.33130\include\optional(11): warning STL4038: The contents of <optional> are available only with C++17 or later.
+E:\code\OpenGL\HW02\Model.h(53,22): warning C4305: “初始化”: 从“double”到“float”截断
+  (编译源文件“utils.cpp”)
+  
+E:\code\OpenGL\HW02\utils.cpp(65,17): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+E:\code\OpenGL\HW02\utils.cpp(66,17): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+E:\code\OpenGL\HW02\utils.cpp(70,19): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+E:\code\OpenGL\HW02\utils.cpp(71,19): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+E:\code\OpenGL\HW02\utils.cpp(75,13): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+E:\code\OpenGL\HW02\utils.cpp(76,13): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+E:\code\OpenGL\HW02\utils.cpp(88,27): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+  正在生成代码...
   HW02.vcxproj -> E:\code\OpenGL\HW02\x64\Debug\HW02.exe

@@ -56,7 +56,7 @@ public:
     vector<unsigned int> strip_conven_indices;
     unsigned int stripVAO;
 
-    bool is_coll;
+    bool is_coll;      //记录是否发生碰撞
 
     // constructor, expects a filepath to a 3D model.
     Model(string const& path, bool gamma = false);
@@ -80,6 +80,8 @@ private:
 
     // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
     void loadModel(string const& path);
+    void saveInnerSurfaceToObj(const string& outputPath);
+
     // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
     void processNode(aiNode* node, const aiScene* scene);
     std::pair<Mesh, Mesh> processMesh(aiMesh* mesh, const aiScene* scene);

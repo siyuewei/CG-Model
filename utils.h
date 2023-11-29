@@ -28,6 +28,9 @@ extern bool firstMouse;
 extern float deltaTime;
 extern float lastFrame;
 
+// lighting
+extern glm::vec3 lightPos;
+
 struct Triangle_indices {
 	unsigned int indice1 = 0;
 	unsigned int indice2 = 0;
