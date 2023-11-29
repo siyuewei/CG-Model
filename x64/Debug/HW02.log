@@ -1,4 +1,7 @@
-﻿  Mesh.cpp
-E:\code\OpenGL\HW02\Mesh.cpp(164,28): warning C4305: “初始化”: 从“double”到“float”截断
-E:\code\OpenGL\HW02\Mesh.cpp(236,57): warning C4267: “参数”: 从“size_t”转换到“GLsizei”，可能丢失数据
+﻿  Ball.cpp
+E:\code\OpenGL\HW02\Ball.cpp(104,20): warning C4244: “-=”: 从“double”转换到“T”，可能丢失数据
+E:\code\OpenGL\HW02\Ball.cpp(104,20): warning C4244:         with
+E:\code\OpenGL\HW02\Ball.cpp(104,20): warning C4244:         [
+E:\code\OpenGL\HW02\Ball.cpp(104,20): warning C4244:             T=float
+E:\code\OpenGL\HW02\Ball.cpp(104,20): warning C4244:         ]
   HW02.vcxproj -> E:\code\OpenGL\HW02\x64\Debug\HW02.exe
