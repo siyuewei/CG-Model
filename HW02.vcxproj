@@ -153,6 +153,8 @@
   <ItemGroup>
     <None Include="ball.fs" />
     <None Include="ball.vs" />
+    <None Include="fragment.fs" />
+    <None Include="fragment.vs" />
     <None Include="model_in.fs" />
     <None Include="model_in.vs" />
     <None Include="model_out.fs" />

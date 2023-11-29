@@ -2,6 +2,8 @@
 
 Model::Model(string const& path, bool gamme) : gammaCorrection(gamme)
 {
+    collision_mesh_indice = -1;
+    is_coll = false;
 	loadModel(path);   
 }
 
@@ -21,8 +23,8 @@ void Model::DrawIn(Shader& shader)
 
 void Model::DrawBox(Shader& shader)
 {
-
-
+    //box.Draw(shader);
+    box.DrawPlane(shader);
 }
 
 void Model::DrawStrip(Shader& shader)
@@ -30,15 +32,33 @@ void Model::DrawStrip(Shader& shader)
     if (strip_conven_indices.empty()) {
         return;
     }
-    //按顺序取出strip_indices中的每个顶点，编号依次是0，1，2...
-    //内外表面之间的三角形条带满足关系：
-    //  1. 编号相同的顶点之间有一条线
-    //  2. 外表面中编号为i的顶点和内表面中编号为i+1的顶点之间有一条线
-    //      如果i是最后一个编号，那就和内表面中编号为0的顶点之间有一条线
-    //这样就可以得到所有的三角形进行绘制
-    vector<glm::vec3> strip_vertex;
-    vector<unsigned int> strip_indices;
 
+    glBindVertexArray(stripVAO);
+    glDrawElements(GL_TRIANGLES, strip_indices.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+}
+
+void Model::DrawFragment(Shader& shader)
+{
+    meshes_out[collision_mesh_indice].DrawFragment(shader);
+}
+
+void Model::updateFragment(float deltatime)
+{
+    if (collision_mesh_indice == -1) {
+        return;
+    }
+    meshes_out[collision_mesh_indice].updateFragment(deltatime, box.min_y);
+}
+
+void Model::setUpStrip()
+{
+    //按顺序取出strip_indices中的每个顶点，编号依次是0，1，2...
+//内外表面之间的三角形条带满足关系：
+//  1. 编号相同的顶点之间有一条线
+//  2. 外表面中编号为i的顶点和内表面中编号为i+1的顶点之间有一条线
+//      如果i是最后一个编号，那就和内表面中编号为0的顶点之间有一条线
+//这样就可以得到所有的三角形进行绘制
     for (unsigned int i = 0; i < strip_conven_indices.size(); ++i) {
         strip_vertex.push_back(meshes_out[collision_mesh_indice].vertices[strip_conven_indices[i]].Position);
         strip_vertex.push_back(meshes_in[collision_mesh_indice].vertices[strip_conven_indices[i]].Position);
@@ -64,7 +84,7 @@ void Model::DrawStrip(Shader& shader)
     strip_indices.push_back(1);
 
     // 生成并绑定VAO
-    unsigned int stripVAO, stripVBO, stripEBO;
+    unsigned int stripVBO, stripEBO;
     glGenVertexArrays(1, &stripVAO);
     glGenBuffers(1, &stripVBO);
     glGenBuffers(1, &stripEBO);
@@ -86,22 +106,24 @@ void Model::DrawStrip(Shader& shader)
     // 绑定结束
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-
-    // 渲染
-    glBindVertexArray(stripVAO);
-    glDrawElements(GL_TRIANGLES, strip_indices.size(), GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
 }
 
-void Model::explosion()
+void Model::explosion(float ball_speed)
 {
+    is_coll = true;
+
     //清除内外表面碰撞的部分
-    this->meshes_out[collision_mesh_indice].explosion();
+    this->meshes_out[collision_mesh_indice].findDeleteTraingle();
     this->meshes_in[collision_mesh_indice].delete_indices = this->meshes_out[collision_mesh_indice].delete_indices;
 
     this->delete_indices = meshes_out[collision_mesh_indice].delete_tri_indices;
     //对delete_indices进行选择排序
     strip_conven_indices = convexHull(delete_indices);
+    setUpStrip();
+
+    //设置mesh中每个三角形的速度
+    meshes_out[collision_mesh_indice].generateFragment();
+    meshes_out[collision_mesh_indice].setSpeed(ball_speed);
 }
 
 vector<unsigned int> Model::convexHull(vector<unsigned int> indices)
@@ -197,10 +219,6 @@ unsigned int Model::findNextEdge(const vector<edge>& prei_edges, glm::vec3 end)
     }
     return UINT_MAX;
 }
-
-
-
-
 
 void Model::loadModel(string const& path)
 {

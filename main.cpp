@@ -65,13 +65,14 @@ int main()
     Shader inShader("model_in.vs", "model_in.fs");
     Shader ballShader("ball.vs", "ball.fs");
     Shader stripShader("strip.vs", "strip.fs");
+    Shader fragmentShader("strip.vs", "strip.fs");
 
 
     // load models
     // -----------
     Model ourModel("models/bunny_simplify.obj");
     //Model testModel("nanosuit/nanosuit.obj");
-    Ball ball(glm::vec3(3.0f, 1.0f, 0.0f), 0.01f);
+    Ball ball(glm::vec3(3.0f, 2.0f, 0.0f), 0.01f);
 
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -104,21 +105,34 @@ int main()
         projection = glm::perspective(glm::radians(camera.getZoom()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
 
+
+        if (check_collision(ourModel, ball)) {
+            ourModel.explosion(deltaTime);
+            ball.explosion(deltaTime);
+        }
+
         // get matrix's uniform location and set matrix
         outShader.use();
         outShader.setMatrix4fv("model", 1, model);
         outShader.setMatrix4fv("view", 1, view);
         outShader.setMatrix4fv("projection", 1, projection);
         ourModel.DrawOut(outShader);
-        ourModel.box.Draw(outShader);
-
+        ourModel.DrawBox(outShader);
+        
+        if (ourModel.is_coll) {
+            ourModel.updateFragment(deltaTime);
+            fragmentShader.use();
+            fragmentShader.setMatrix4fv("model", 1, model);
+            fragmentShader.setMatrix4fv("view", 1, view);
+            fragmentShader.setMatrix4fv("projection", 1, projection);
+            ourModel.DrawFragment(fragmentShader);
+        }
 
         inShader.use();
         inShader.setMatrix4fv("model", 1, model);
         inShader.setMatrix4fv("view", 1, view);
         inShader.setMatrix4fv("projection", 1, projection);
         ourModel.DrawIn(inShader);
-
 
         ballShader.use();
         ballShader.setMatrix4fv("model", 1, model);
@@ -127,16 +141,12 @@ int main()
         ball.update(deltaTime);
         ball.Draw(ballShader);
 
-        if (check_collision(ourModel, ball)) {
-            ball.explosion(deltaTime);
-            ourModel.explosion();
-        }
-        
         stripShader.use();
         stripShader.setMatrix4fv("model", 1, model);
         stripShader.setMatrix4fv("view", 1, view);
         stripShader.setMatrix4fv("projection", 1, projection);
         ourModel.DrawStrip(stripShader);
+
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

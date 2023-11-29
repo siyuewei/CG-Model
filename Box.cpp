@@ -22,6 +22,28 @@ void Box::setupBox()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+void Box::setupPlane()
+{
+	glGenVertexArrays(1, &VAO_line);
+	glGenBuffers(1, &VBO_line);
+	glGenBuffers(1, &EBO_line);
+
+	glBindVertexArray(VAO_line);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_line);
+	glBufferData(GL_ARRAY_BUFFER, vertex_plane.size() * sizeof(glm::vec3), &vertex_plane[0], GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_plane.size() * sizeof(unsigned int), &indices_plane[0], GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
 Box::Box()
 {
 }
@@ -53,22 +75,43 @@ Box::Box(float min_x, float max_x, float min_y, float max_y, float min_z, float 
 		0, 3, 7, 0, 4, 7,
 		0, 1, 5, 0, 4, 5,
 		1, 2, 6, 1, 5, 6,
-		2, 3, 7, 2, 6, 7
+		2, 3, 7, 2, 6, 7,
+		4, 5, 6, 4, 6, 7
 	};
-
-	// Calculate the number of indices
 	unsigned int numIndices = sizeof(indices) / sizeof(indices[0]);
-
-	// Clear existing indices_box
 	indices_box.clear();
-
-	// Populate indices_box based on the provided indices array
 	for (unsigned int i = 0; i < numIndices; ++i)
 	{
 		indices_box.push_back(indices[i]);
 	}
 
 	setupBox();
+
+	float line_min_x = min_x * 3 / 2 - max_x / 2;
+	float line_max_x = max_x * 3 / 2 - min_x / 2;
+	float line_min_z = min_z * 3 / 2 - max_z / 2;
+	float line_max_z = max_z * 3 / 2 - min_z / 2;
+	vertex_tmp = glm::vec3(line_max_x, min_y, line_max_z);
+	vertex_plane.push_back(vertex_tmp);
+	vertex_tmp = glm::vec3(line_max_x, min_y, line_min_z);
+	vertex_plane.push_back(vertex_tmp);
+	vertex_tmp = glm::vec3(line_min_x, min_y, line_min_z);
+	vertex_plane.push_back(vertex_tmp);
+	vertex_tmp = glm::vec3(line_min_x, min_y, line_max_z);
+	vertex_plane.push_back(vertex_tmp);
+
+	unsigned int line_indices[] = {
+		0,1,2,
+		0,2,3
+	};
+	unsigned int line_numIndices = sizeof(line_indices) / sizeof(line_indices[0]);
+	indices_plane.clear();
+	for (unsigned int i = 0; i < line_numIndices; ++i)
+	{
+		indices_plane.push_back(indices[i]);
+	}
+
+	setupPlane();
 }
 
 void Box::Draw(Shader& shader)
@@ -76,6 +119,15 @@ void Box::Draw(Shader& shader)
 	glBindVertexArray(VAO);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glDrawElements(GL_TRIANGLES, indices_box.size(), GL_UNSIGNED_INT, 0);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glBindVertexArray(0);
+}
+
+void Box::DrawPlane(Shader& shader)
+{
+	glBindVertexArray(VAO_line);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glDrawElements(GL_TRIANGLES, indices_plane.size(), GL_UNSIGNED_INT, 0);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glBindVertexArray(0);
 }

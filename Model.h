@@ -47,12 +47,16 @@ public:
     vector<Mesh> meshes_out;
     vector<Mesh> meshes_in;
     Box box;
+
     string directory;
     bool gammaCorrection;
     float distance = 0.01;
     unsigned int collision_mesh_indice;//记录碰撞发生在哪个mesh上
     vector<unsigned int> delete_indices;
     vector<unsigned int> strip_conven_indices;
+    unsigned int stripVAO;
+
+    bool is_coll;
 
     // constructor, expects a filepath to a 3D model.
     Model(string const& path, bool gamma = false);
@@ -62,12 +66,17 @@ public:
     void DrawIn(Shader& shader);
     void DrawBox(Shader& shader);
     void DrawStrip(Shader& shader);
-    void explosion();
+    void DrawFragment(Shader& shader);
 
+    void explosion(float ball_speed);
+    void updateFragment(float deltatime);
 private:
+    vector<glm::vec3> strip_vertex;
+    vector<unsigned int> strip_indices;
     vector<unsigned int> convexHull(vector<unsigned int> points);
     void addEdge(vector<edge>& edges, glm::vec3 start, glm::vec3 end, unsigned int start_indice, unsigned int end_indice);
     unsigned int findNextEdge(const vector<edge>& prei_edges, glm::vec3 end_indice);
+    void setUpStrip();
 
     // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
     void loadModel(string const& path);

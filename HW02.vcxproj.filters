@@ -94,5 +94,11 @@
     <None Include="strip.vs">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="fragment.fs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="fragment.vs">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
 </Project>
