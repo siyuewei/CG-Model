@@ -74,7 +74,7 @@ int main()
     // -----------
     Model ourModel("models/bunny_simplify.obj");
     //Model testModel("nanosuit/nanosuit.obj");
-    Ball ball(glm::vec3(1.5f, 0.3f, 0.0f), 0.01f);
+    Ball ball(glm::vec3(1.5f, 0.3f, 2.0f), 0.01f);
 
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -158,9 +158,6 @@ int main()
             stripShader.setMatrix4fv("projection", 1, projection);
             ourModel.DrawStrip(stripShader);
         }
- 
-
-
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);

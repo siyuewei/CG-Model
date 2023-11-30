@@ -11,7 +11,7 @@ private:
 	std::vector<glm::vec3> vertex_box;
 	std::vector<unsigned int> indices_box;
 
-	std::vector<glm::vec3> vertex_plane;
+	std::vector<glm::vec3> vertex_plane; //包含位置和法线
 	std::vector<unsigned int> indices_plane;
 
 	void setupBox();

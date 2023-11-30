@@ -14,7 +14,7 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-glm::vec3 lightPos = glm::vec3(-5.0f, 4.0f, 0.0f);
+glm::vec3 lightPos = glm::vec3(5.0f, 4.0f, 0.0f);
 
 extern bool start;
 

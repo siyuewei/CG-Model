@@ -183,7 +183,7 @@ void Mesh::setSpeed(float speed)
 
         //沿法线方向飞出
         glm::vec3 direction = glm::normalize(ver1.Normal + ver2.Normal + ver3.Normal);
-        glm::vec3 nor_speed = glm::vec3(direction.x * speed * 6.0, direction.y * speed * 6.0, direction.z * speed * 6.0); //沿法线方向弹出去的速度
+        glm::vec3 nor_speed = glm::vec3(direction.x * speed * 70.0, direction.y * speed * 70.0, direction.z * speed * 70.0); //沿法线方向弹出去的速度
         glm::vec3 g_speed = glm::vec3(0, 0, 0);  //重力方向的速度
         glm::vec3 final_speed = nor_speed + g_speed;
 

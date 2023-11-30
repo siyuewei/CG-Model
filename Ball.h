@@ -16,8 +16,7 @@ class Ball
 private:
 	glm::vec3 center;
 	float radius;
-	glm::vec3 direction;
-	float speed = 0.2f;
+	glm::vec3 speed;
 	static float moveTime;
 	std::vector<glm::vec3> sphereVertices;
 	std::vector<int> sphereIndices;

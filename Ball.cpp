@@ -62,7 +62,8 @@ void Ball::setupBall()
 Ball::Ball(glm::vec3 center, float radius):center(center),radius(radius)
 {
 	moveTime = 0.0f;
-	direction = glm::normalize(glm::vec3(0.0f, 0.0f, 0.0f) - center);
+	glm::vec3 tmp = glm::normalize(glm::vec3(0.0f, 0.0f, 0.0f) - center);
+	speed = glm::vec3(tmp.x * 0.8, tmp.y * 0.8, tmp.z * 0.8);
 
 }
 
@@ -86,8 +87,8 @@ std::vector<glm::vec3> Ball::getVertices()
 
 void Ball::explosion(float deltatime)
 {
-	direction = -direction;
-	center += direction * deltatime;
+	speed = -speed;
+	center += speed * deltatime;
 	speed *= 0.5;
 }
 
@@ -98,16 +99,14 @@ glm::vec3 Ball::getCenter()
 
 void Ball::update(float deltatime)
 {
-	float velocity = speed * deltatime;
-	center += direction * velocity;
-	//考虑重力加速度，每次y轴方向加 1/2g(t1^2-t2^2) 
-	center.y -= 0.006 * ((moveTime + deltatime) * (moveTime + deltatime) - moveTime * moveTime);
-	moveTime += deltatime;
+	//考虑重力加速度
+	speed += (0.0, -0.2, 0.0) * deltatime;
+	center += speed * deltatime;
 }
 
 glm::vec3 Ball::getDirection()
 {
-	return direction;
+	return glm::normalize(speed);
 }
 
 float Ball::getRadius()
